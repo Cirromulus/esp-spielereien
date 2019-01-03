@@ -8,8 +8,8 @@
 #include <ESP8266mDNS.h>
 #include <string.h>
 
-const char * ssid = "WLAN nicht verfuegbar.";
-const char * password = "Ich habe kein Passwort.";
+const char * ssid = "BehindertesWLANFuerDenDrucker";
+const char * password = "0~0~0}{0~";
 
 #define PIN 2
 
@@ -115,11 +115,11 @@ void setup() {
         }
         if(server.hasArg("g"))
         {
-            r = std::strtoul(server.arg("g").c_str(), nullptr, 10);
+            g = std::strtoul(server.arg("g").c_str(), nullptr, 10);
         }
         if(server.hasArg("b"))
         {
-            r = std::strtoul(server.arg("b").c_str(), nullptr, 10);
+            b = std::strtoul(server.arg("b").c_str(), nullptr, 10);
         }
 
         char answer[50] ;
