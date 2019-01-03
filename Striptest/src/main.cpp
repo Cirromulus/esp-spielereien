@@ -21,7 +21,8 @@ const char * password = "0~0~0}{0~";
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(72*4, PIN, NEO_GRB + NEO_KHZ800);
+uint16_t numOfPixels = 72*4;
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(numOfPixels, PIN, NEO_GRB + NEO_KHZ800);
 //AsyncUDP udp;
 
 enum class Mode : uint8_t
@@ -71,16 +72,17 @@ void handleNotFound(){
   server.send(404, "text/plain", message);
 }
 
+bool newCommand = false;
 bool HandleAndDelay(uint8_t wait)
 {
     unsigned long prev = millis();
-    Mode bak = activeMode;
+    newCommand = false;
     server.handleClient();
     unsigned long now = millis();
 
     if(now - prev < wait)
         delay(wait - (now-prev));
-    return bak != activeMode;
+    return newCommand;
 }
 
 void setup() {
@@ -96,6 +98,7 @@ void setup() {
     }
     myIp = WiFi.localIP();
     server.on("/", [](){
+        newCommand = true;
         bool modeWrong = false;
         if(server.hasArg("mode"))
         {
@@ -121,11 +124,34 @@ void setup() {
         {
             b = std::strtoul(server.arg("b").c_str(), nullptr, 10);
         }
+        if(server.hasArg("pixels"))
+        {
+            uint16_t target = std::strtoul(server.arg("pixels").c_str(), nullptr, 10);
+            if(target > 1)
+            {
+                numOfPixels = target;
+                strip.updateLength(numOfPixels);
+            }
+        }
 
-        char answer[50] ;
-        sprintf(answer, "Mode: %s\nr: %03d g: %03d b: %03d\n%s", modeNames[static_cast<uint8_t>(activeMode)], r, g, b, modeWrong ? "invalid mode" : " ");
-
-        server.send(200, "text/plain", answer);
+        String s;
+        s += String("Current Mode: ") + modeNames[static_cast<uint8_t>(activeMode)] + "\n";
+        s += String("Current r: ") + r + " g: " + g + " b: " + b + "\n";
+        if(modeWrong)
+        {
+            s += "You entered an invalid Mode.\n";
+        }
+        s += "Valid Modes are:\n";
+        for(uint8_t m = 0; m <= static_cast<uint8_t>(Mode::none); m++)
+        {
+            s += String("\t") + m + " = " + modeNames[m] + "\n";
+        }
+        s += String("Number of Pixels: ") + numOfPixels + "\n";
+        server.send(200, "text/plain", s.c_str());
+        if(activeMode == Mode::none)
+        {
+            strip.clear();
+        }
     });
 
     server.onNotFound(handleNotFound);
@@ -154,7 +180,8 @@ void loop() {
         case Mode::rainbowCycle:
             rainbowCycle(18);
             break;
-        default:
+    	case Mode::none:
+            break;
         break;
     }
     server.handleClient();
