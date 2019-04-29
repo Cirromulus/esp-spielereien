@@ -6,6 +6,9 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <string.h>
+#include "Wire.h"
+#define DS3231_ADDRESSE 0x68
+
 
 const char * ssid = "BehindertesWLANFuerDenDrucker";
 const char * password = "0~0~0}{0~";
@@ -21,6 +24,14 @@ IPAddress myIp;
 
 void blinkIP();
 void handleAndDelay(uint16_t wait);
+byte decToBcd(byte val) {
+// Dezimal Zahl zu binary coded decimal (BCD) umwandeln
+  return((val/10*16) + (val%10));
+}
+byte bcdToDec(byte val) {
+// BCD (binary coded decimal) in Dezimal Zahl umwandeln
+  return((val/16*10) + (val%16));
+}
 
 void handleNotFound(){
   String message = "File Not Found\n\n";
@@ -43,6 +54,8 @@ void setup() {
 
     analogWrite(LINKS, l);
     analogWrite(RECHTS, r);
+
+    Wire.begin(1, 3);
 
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
@@ -70,11 +83,36 @@ void setup() {
         {
             r = std::strtoul(server.arg("r").c_str(), nullptr, 10);
         }
+        Wire.beginTransmission(DS3231_ADDRESSE);
+        Wire.write(0); // DS3231 Register zu 00h
+        Wire.endTransmission();
+        Wire.requestFrom(DS3231_ADDRESSE, 7); // 7 Byte Daten vom DS3231 holen
+        byte sekunde = bcdToDec(Wire.read() & 0x7f);
+        bcdToDec(Wire.read());
+        bcdToDec(Wire.read() & 0x3f);
+        bcdToDec(Wire.read());
+        bcdToDec(Wire.read());
+        bcdToDec(Wire.read());
+        bcdToDec(Wire.read());
+
         char answer[50] ;
-        sprintf(answer, "l: %04d r: %04d\n", l, r);
+        sprintf(answer, "l: %04d r: %04d\nSekunden: %d", l, r, sekunde);
+
         analogWrite(LINKS, l);
         analogWrite(RECHTS, r);
         server.send(200, "text/plain", answer);
+    });
+
+    server.on("/setClock", []()
+    {
+        if(server.hasArg("ts"))
+        {
+            unsigned long newTS = std::strtoul(server.arg("ts").c_str(), nullptr, 10);
+            char answer[50] ;
+            sprintf(answer, "new timestamp: %d", ts);
+            server.send(200, "text/plain", answer);
+        }
+        server.send(200, "text/plain", "no timestamp");
     });
 
     server.onNotFound(handleNotFound);
