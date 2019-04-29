@@ -132,6 +132,7 @@ void loop() {
     if(counter++ > 0xFFFFF)
     {
         setLight();
+        counter = 0;
     }
 }
 
