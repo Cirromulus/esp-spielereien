@@ -55,9 +55,6 @@ void setup() {
     pinMode(WARM, OUTPUT);
     pinMode(KALT, OUTPUT);
 
-    analogWrite(WARM, warm = 0);
-    analogWrite(KALT, kalt = 0);
-
     Wire.begin(1, 3);
 
     setSyncProvider(RTC.get);                     // the function to get the time from the RTC
