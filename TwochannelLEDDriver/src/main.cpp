@@ -23,6 +23,8 @@ const char * password = "0~0~0}{0~";
 
 #define WARM 2
 #define KALT 0
+#define SDA 1
+#define SCL 3
 #define AW_MAX 1024
 
 uint16_t kalt = 0, warm = 0;
@@ -50,12 +52,14 @@ void handleNotFound(){
   server.send(404, "text/plain", message);
 }
 void setLight();
+void clearI2CBus();
 
 void setup() {
     pinMode(WARM, OUTPUT);
     pinMode(KALT, OUTPUT);
 
-    Wire.begin(1, 3);
+    clearI2CBus();
+    Wire.begin(SDA, SCL);
 
     setSyncProvider(RTC.get);                     // the function to get the time from the RTC
     if (timeStatus() != timeSet)
@@ -178,4 +182,21 @@ void setLight()
     {
         analogWrite(KALT, kalt = 0);
     }
+}
+
+void clearI2CBus()
+{
+    //Serial.print(digitalRead(PIN_SCL));    //should be HIGH
+    //Serial.println(digitalRead(PIN_SDA));   //should be HIGH, is LOW on stuck I2C bus
+
+    if(digitalRead(SCL) == HIGH && digitalRead(SDA) == LOW) {
+          Serial.println("reset");
+          pinMode(SDA, OUTPUT);      // is connected to SDA
+          digitalWrite(SDA, LOW);
+          delay(2000);               //maybe too long
+          pinMode(SDA, INPUT);       // reset pin
+          delay(50);
+    }
+    //Serial.print(digitalRead(26));    // HIGH
+    //Serial.println(digitalRead(25));  // HIGH
 }
