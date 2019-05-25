@@ -101,7 +101,7 @@ void setup() {
         time_t sRise = sm.sunRise();
         time_t sSet  = sm.sunSet();
         char answer[100] ;
-        sprintf(answer, "warm: %04d kalt: %04d\nnow: %lu, rise: %lu, set: %lu", warm, kalt, myTime, sRise, sSet);
+        sprintf(answer, "warm: %04d kalt: %04d\nnow: %lu, rise: %lu, set: %lu\n(/setClock?ts=[timestamp])", warm, kalt, myTime, sRise, sSet);
 
         analogWrite(WARM, warm);
         analogWrite(KALT, kalt);
@@ -130,7 +130,7 @@ void loop() {
     if(startup)
         blinkIP();
     static uint32_t counter = 0;
-    if(counter++ > 0xFFFFF)
+    if(counter++ > 0xEFFFF)
     {
         setLight();
         counter = 0;
@@ -171,15 +171,17 @@ void handleAndDelay(uint16_t wait)
 
 void setLight()
 {
-    analogWrite(WARM, warm = AW_MAX);
+
     time_t now = RTC.get();
     if(now > sm.sunRise() && now < sm.sunSet())
     {
         //hell!
+        analogWrite(WARM, warm = AW_MAX);
         analogWrite(KALT, kalt = AW_MAX);
     }
     else
     {
+        analogWrite(WARM, warm = AW_MAX/2);
         analogWrite(KALT, kalt = 0);
     }
 }
