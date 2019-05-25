@@ -192,7 +192,7 @@ void clearI2CBus()
     //Serial.println(digitalRead(PIN_SDA));   //should be HIGH, is LOW on stuck I2C bus
 
     if(digitalRead(SCL) == HIGH && digitalRead(SDA) == LOW) {
-          Serial.println("reset");
+          //Serial.println("reset");
           pinMode(SDA, OUTPUT);      // is connected to SDA
           digitalWrite(SDA, LOW);
           delay(2000);               //maybe too long
