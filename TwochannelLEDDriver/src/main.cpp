@@ -62,8 +62,10 @@ void setup() {
     Wire.begin(SDA, SCL);
 
     setSyncProvider(RTC.get);                     // the function to get the time from the RTC
-    if (timeStatus() != timeSet)
+    if (timeStatus() != timeSet){
+      blinkIP();
       return;
+    }
     sm.init(OUR_timezone, OUR_latitude, OUR_longtitude);
     setLight();
 
@@ -83,12 +85,11 @@ void setup() {
 
     //analogWrite(WARM, l = 0);
     //analogWrite(KALT, r = 0);
-    MDNS.begin("MultiLED");
+    MDNS.begin("DualLED");
     myIp = WiFi.localIP();
     startup = false;        //to prevent blinking the IP
     server.on("/", []()
     {
-
         if(server.hasArg("warm"))
         {
             warm = std::strtoul(server.arg("warm").c_str(), nullptr, 10);
@@ -100,8 +101,9 @@ void setup() {
         time_t myTime = RTC.get();
         time_t sRise = sm.sunRise();
         time_t sSet  = sm.sunSet();
-        char answer[100] ;
-        sprintf(answer, "warm: %04d kalt: %04d\nnow: %lu, rise: %lu, set: %lu\n(/setClock?ts=[timestamp])", warm, kalt, myTime, sRise, sSet);
+        char answer[150] ;
+        sprintf(answer, "warm: %04d kalt: %04d\nnow: %lu, rise: %d, set: %d (%s)\n(/setClock?ts=[timestamp])",
+                warm, kalt, myTime, sRise - myTime, sSet - myTime, (myTime > sRise && myTime < sSet) ? "day" : "night");
 
         analogWrite(WARM, warm);
         analogWrite(KALT, kalt);
@@ -116,6 +118,7 @@ void setup() {
             char answer[50] ;
             sprintf(answer, "new timestamp: %lu", ts);
             RTC.set(ts);
+            setLight();
             server.send(200, "text/plain", answer);
         }
         server.send(200, "text/plain", "no timestamp");
@@ -190,6 +193,8 @@ void clearI2CBus()
 {
     //Serial.print(digitalRead(PIN_SCL));    //should be HIGH
     //Serial.println(digitalRead(PIN_SDA));   //should be HIGH, is LOW on stuck I2C bus
+    pinMode(SDA, INPUT_PULLUP); // Make SDA (data) and SCL (clock) pins Inputs with pullup.
+    pinMode(SCL, INPUT_PULLUP);
 
     if(digitalRead(SCL) == HIGH && digitalRead(SDA) == LOW) {
           //Serial.println("reset");
