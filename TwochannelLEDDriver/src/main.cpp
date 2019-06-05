@@ -122,7 +122,7 @@ void loop() {
     if(startup)
         blinkIP();
     static uint32_t counter = 0;
-    if(counter++ > 0x0FFF)
+    if(counter++ > 0x0FFFF)
     {
         setLight();
         counter = 0;
