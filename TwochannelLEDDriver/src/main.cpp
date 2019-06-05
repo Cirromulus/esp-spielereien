@@ -14,7 +14,7 @@
 
 #define OUR_latitude    53.075600
 #define OUR_longtitude  8.801781
-#define OUR_timezone    120                     // localtime with UTC difference in minutes
+#define OUR_timezone    0                     // localtime with UTC difference in minutes
 #define DS3231_ADDRESSE 0x68
 
 
@@ -28,6 +28,7 @@ const char * password = "0~0~0}{0~";
 #define AW_MAX 1024
 
 uint16_t kalt = 0, warm = 0;
+uint16_t kaltMax = AW_MAX, warmTarget = AW_MAX;
 bool startup = true;
 
 ESP8266WebServer server(80);
@@ -92,18 +93,18 @@ void setup() {
     {
         if(server.hasArg("warm"))
         {
-            warm = std::strtoul(server.arg("warm").c_str(), nullptr, 10);
+            warmTarget = std::strtoul(server.arg("warm").c_str(), nullptr, 10);
         }
         if(server.hasArg("kalt"))
         {
-            kalt = std::strtoul(server.arg("kalt").c_str(), nullptr, 10);
+            kaltTarget = std::strtoul(server.arg("kalt").c_str(), nullptr, 10);
         }
         time_t myTime = RTC.get();
         time_t sRise = sm.sunRise();
         time_t sSet  = sm.sunSet();
         char answer[150] ;
-        sprintf(answer, "warm: %04d kalt: %04d\nnow: %lu, rise: %d, set: %d (%s)\n(/setClock?ts=[timestamp])",
-                warm, kalt, myTime, sRise - myTime, sSet - myTime, (myTime > sRise && myTime < sSet) ? "day" : "night");
+        sprintf(answer, "warm: %04d kalt: %04d\nnow: %lu, rise: %l, set: %l (%s)\n(/setClock?ts=[timestamp])",
+                warmTarget, kaltTarget, myTime, sRise - myTime, sSet - myTime, (myTime > sRise && myTime < sSet) ? "day" : "night");
 
         analogWrite(WARM, warm);
         analogWrite(KALT, kalt);
@@ -133,7 +134,7 @@ void loop() {
     if(startup)
         blinkIP();
     static uint32_t counter = 0;
-    if(counter++ > 0xEFFFF)
+    if(counter++ > 0x0FFF)
     {
         setLight();
         counter = 0;
@@ -179,12 +180,12 @@ void setLight()
     if(now > sm.sunRise() && now < sm.sunSet())
     {
         //hell!
-        analogWrite(WARM, warm = AW_MAX);
-        analogWrite(KALT, kalt = AW_MAX);
+        analogWrite(WARM, warm = warmTarget);
+        analogWrite(KALT, kalt = kaltTarget);
     }
     else
     {
-        analogWrite(WARM, warm = AW_MAX/2);
+        analogWrite(WARM, warm = warmTarget);
         analogWrite(KALT, kalt = 0);
     }
 }
