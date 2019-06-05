@@ -28,7 +28,7 @@ const char * password = "0~0~0}{0~";
 #define AW_MAX 1024
 
 uint16_t kalt = 0, warm = 0;
-uint16_t kaltMax = AW_MAX, warmTarget = AW_MAX;
+uint16_t kaltTarget = AW_MAX, warmTarget = AW_MAX;
 bool startup = true;
 
 ESP8266WebServer server(80);
@@ -75,17 +75,8 @@ void setup() {
     while(WiFi.status() != WL_CONNECTED)
     {
         delay(500);
-        /*
-        l = l ? 0 : 512;
-        r = r ? 0 : 512;
-        analogWrite(WARM, l);
-        analogWrite(KALT, r);
-        */
-
     }
 
-    //analogWrite(WARM, l = 0);
-    //analogWrite(KALT, r = 0);
     MDNS.begin("DualLED");
     myIp = WiFi.localIP();
     startup = false;        //to prevent blinking the IP
@@ -102,12 +93,9 @@ void setup() {
         time_t myTime = RTC.get();
         time_t sRise = sm.sunRise();
         time_t sSet  = sm.sunSet();
-        char answer[150] ;
-        sprintf(answer, "warm: %04d kalt: %04d\nnow: %lu, rise: %l, set: %l (%s)\n(/setClock?ts=[timestamp])",
+        char answer[200] ;
+        sprintf(answer, "warm: %04d kalt: %04d\nnow: %lu, rise: %d, set: %d (%s)\n(/setClock?ts=[timestamp])",
                 warmTarget, kaltTarget, myTime, sRise - myTime, sSet - myTime, (myTime > sRise && myTime < sSet) ? "day" : "night");
-
-        analogWrite(WARM, warm);
-        analogWrite(KALT, kalt);
         server.send(200, "text/plain", answer);
     });
 
@@ -185,7 +173,7 @@ void setLight()
     }
     else
     {
-        analogWrite(WARM, warm = warmTarget);
+        analogWrite(WARM, warm = warmTarget / 2);
         analogWrite(KALT, kalt = 0);
     }
 }
