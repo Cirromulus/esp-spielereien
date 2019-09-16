@@ -4,6 +4,7 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
+#include <PubSubClient.h>
 #include <ESP8266mDNS.h>
 #include <string.h>
 #include <Wire.h>
@@ -20,6 +21,7 @@
 
 const char * ssid = "BehindertesWLANFuerDenDrucker";
 const char * password = "0~0~0}{0~";
+const char * mqtt_server = "192.168.0.8";
 
 #define WARM 2
 #define KALT 0
@@ -30,8 +32,11 @@ const char * password = "0~0~0}{0~";
 uint16_t kalt = 0, warm = 0;
 uint16_t kaltTarget = AW_MAX, warmTarget = AW_MAX;
 bool startup = true;
+bool auto_mode = true;
 
 ESP8266WebServer server(80);
+WiFiClient espClient;
+PubSubClient client(espClient);
 DS3232RTC RTC(false);
 sunMoon sm;
 IPAddress myIp;
@@ -54,6 +59,44 @@ void handleNotFound(){
 }
 void setLight();
 void clearI2CBus();
+void mqtt_callback(char* topic, byte* payload, unsigned int length) {
+  if(strcmp(topic, "dualLED/ww") == 0)
+  {
+      warmTarget = std::strtoul((const char*)payload, nullptr, 10);
+  }
+  else if(strcmp(topic, "dualLED/cw") == 0)
+  {
+      kaltTarget = std::strtoul((const char*)payload, nullptr, 10);
+  }
+  else if(strcmp(topic, "dualLED/timestamp") == 0)
+  {
+      time_t ts = std::strtoul((const char*)payload, nullptr, 10);
+      RTC.set(ts);
+      setLight();
+  }
+  else if(strcmp(topic, "dualLED/auto_calc") == 0)
+  {
+      auto_mode = payload[0] != '0';
+  }
+}
+void mqtt_reconnect() {
+  // Loop until we're reconnected
+  while (!client.connected()) {
+    // Create a random client ID
+    String clientId = "ESP8266Client-";
+    clientId += String(random(0xffff), HEX);
+    // Attempt to connect
+    if (client.connect(clientId.c_str())) {
+      client.subscribe("dualLED/ww");
+      client.subscribe("dualLED/cw");
+      client.subscribe("dualLED/timestamp");
+      client.subscribe("dualLED/auto_calc");
+    } else {
+      delay(1000);
+    }
+  }
+}
+
 
 void setup() {
     pinMode(WARM, OUTPUT);
@@ -115,10 +158,17 @@ void setup() {
 
     server.onNotFound(handleNotFound);
     server.begin();
+
+    client.setServer(mqtt_server, 1883);
+    client.setCallback(mqtt_callback);
 }
 
 void loop() {
     server.handleClient();
+    if (!client.connected()) {
+      mqtt_reconnect();
+    }
+    client.loop();
     if(startup)
         blinkIP();
     static uint32_t counter = 0;
@@ -165,7 +215,7 @@ void setLight()
 {
 
     time_t now = RTC.get();
-    if(now > sm.sunRise() && now < sm.sunSet())
+    if((now > sm.sunRise() && now < sm.sunSet()) || !auto_mode)
     {
         //hell!
         analogWrite(WARM, warm = warmTarget);
@@ -176,6 +226,11 @@ void setLight()
         analogWrite(WARM, warm = warmTarget / 2);
         analogWrite(KALT, kalt = 0);
     }
+    char buf[200];
+    sprintf(buf, "%04d", warm);
+    client.publish("dualLED/status/ww", buf);
+    sprintf(buf, "%04d", kalt);
+    client.publish("dualLED/status/cw", buf);
 }
 
 void clearI2CBus()
