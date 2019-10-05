@@ -231,6 +231,10 @@ void setLight()
     client.publish("dualLED/status/ww", buf);
     sprintf(buf, "%04d", kalt);
     client.publish("dualLED/status/cw", buf);
+    sprintf(buf, "%11d", now);
+    client.publish("dualLED/status/timestamp", buf);
+    sprintf(buf, "%c", auto_mode ? '1' : '0');
+    client.publish("dualLED/status/auto_calc", buf);
 }
 
 void clearI2CBus()
