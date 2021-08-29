@@ -159,10 +159,8 @@ void lift(uint16_t lift_amount) {
     }
     delay(PATH_WRITE_DELAY);  //ease the transition
 #else
-    //if coming from "on" state, rest a bit
-    if(servoLift == LIFT0 && lift_amount != LIFT0)
-        delay(PATH_WRITE_DELAY << 2);  //ease the transition
 
+    delay(PATH_WRITE_DELAY << 3);  //ease the transition
     servoLift = lift_amount;
     digitalWrite(SERVOPINLIFT, lift_amount == LIFT0);
 #endif

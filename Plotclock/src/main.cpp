@@ -17,7 +17,7 @@
 
 
 
-#include <Time.h> // see http://playground.arduino.cc/Code/time
+#include <Timezone.h>    // https://github.com/JChristensen/Timezone
 #include <Servo.h>
 
 #include "config.hpp"
@@ -32,6 +32,11 @@
   #include <Wire.h>
   #include <DS1307RTC.h> // see http://playground.arduino.cc/Code/time
   #include "setTime.hpp"
+
+  // US Eastern Time Zone (New York, Detroit)
+  TimeChangeRule myDST = {"CEST", week_t::Second, Sun, Mar, 2, +120};
+  TimeChangeRule mySTD = {"CET",  week_t::First, Sun, Nov, 2, +60};
+  Timezone timezone(myDST, mySTD);
 #endif
 
 #ifndef GLOWINDARK
@@ -50,8 +55,9 @@ void setup()
   tmElements_t tm;
   if (RTC.read(tm))
   {
-    setTime(tm.Hour,tm.Minute,tm.Second,tm.Day,tm.Month,tm.Year);
+    setSyncProvider(RTC.get);
     Serial.println("DS1307 time is set OK.");
+
   }
   else
   {
@@ -109,6 +115,11 @@ void loop()
   }
 #endif
 
+    time_t t = now();
+    #ifdef REALTIMECLOCK
+        t = timezone.toLocal(t);
+    #endif
+
   if (last_min != minute()) {
 #ifndef GLOWINDARK
     if (!servo_lift.attached()) servo_lift.attach(SERVOPINLIFT);
@@ -121,13 +132,13 @@ void loop()
     lift(LIFT0);
     drawNumber( 3, 3, 111, 1);   //wipe
 #endif
-    drawNumber(char_offset_x[0], char_offset_y, hour() / 10, 0.9);
-    drawNumber(char_offset_x[1], char_offset_y, hour() % 10, 0.9);
+    drawNumber(char_offset_x[0], char_offset_y, hour(t) / 10, 0.9);
+    drawNumber(char_offset_x[1], char_offset_y, hour(t) % 10, 0.9);
 
     drawNumber(char_offset_x[2], char_offset_y, 11, 0.9);    // dots
 
-    drawNumber(char_offset_x[3], char_offset_y, minute() / 10, 0.9);
-    drawNumber(char_offset_x[4], char_offset_y, minute() % 10, 0.9);
+    drawNumber(char_offset_x[3], char_offset_y, minute(t) / 10, 0.9);
+    drawNumber(char_offset_x[4], char_offset_y, minute(t) % 10, 0.9);
 
     lift(LIFT2);
     drawTo(rest_position[0], rest_position[1]);   // pen rest
