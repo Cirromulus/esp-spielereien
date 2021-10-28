@@ -4,7 +4,8 @@
 Servo myservo;  // create servo object to control a servo
 
 static constexpr unsigned potpin = PA0;  // analog pin used to connect the potentiometer
-static constexpr uint16_t ANALOG_MAX_VALUE = (1 << 12) - 1;
+static constexpr uint8_t  ANALOG_IN_RESOLUTION = 12;    // bits
+static constexpr uint16_t ANALOG_MAX_VALUE = (1 << ANALOG_IN_RESOLUTION) - 1;
 static constexpr uint16_t SERVO_MIN_MS = 900;
 static constexpr uint16_t SERVO_MAX_MS = 2000;
 static constexpr uint16_t STEP_SIZE_MS = 2;
@@ -12,6 +13,7 @@ static constexpr uint16_t STEPS_PER_S = 20;
 uint16_t val_set_ms, val_target_ms;    // variable to read the value from the analog pin
 
 void setup() {
+    analogReadResolution(ANALOG_IN_RESOLUTION);
     val_set_ms = 900;
     myservo.attach(PB0);  // attaches the servo on pin 9 to the servo object
     myservo.writeMicroseconds(val_set_ms);
