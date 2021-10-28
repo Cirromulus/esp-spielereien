@@ -126,19 +126,17 @@ void drawNumber(float bx, float by, int num, float scale) {
     drawTo(bx + 5 * scale, by + 15 * scale);
     lift(LIFT0);
     bogenGZS(bx + 5 * scale, by + 15 * scale, 0.1 * scale, 1, -1, 1);
-    delay(PATH_WRITE_DELAY << 5);
+    delay((PATH_WRITE_DELAY_US << 5) / 1000);   // big value
     lift(LIFT1);
     drawTo(bx + 5 * scale, by + 5 * scale);
     lift(LIFT0);
     bogenGZS(bx + 5 * scale, by + 5 * scale, 0.1 * scale, 1, -1, 1);
-    delay(PATH_WRITE_DELAY << 5);
+    delay((PATH_WRITE_DELAY_US << 5) / 1000);
     lift(LIFT1);
     break;
 
   }
 }
-
-
 
 void lift(uint16_t lift_amount) {
 #ifndef GLOWINDARK
@@ -157,10 +155,10 @@ void lift(uint16_t lift_amount) {
         delayMicroseconds(LIFTSPEED);
       }
     }
-    delay(PATH_WRITE_DELAY);  //ease the transition
+    delayMicroseconds(PATH_WRITE_DELAY_US);  //ease the transition
 #else
 
-    delay(PATH_WRITE_DELAY << 3);  //ease the transition
+    delayMicroseconds(PATH_WRITE_DELAY_US << 2);  //ease the transition
     servoLift = lift_amount;
     digitalWrite(SERVOPINLIFT, lift_amount == LIFT0);
 #endif
@@ -233,7 +231,7 @@ void set_XY(double Tx, double Ty)
 void drawTo(double pX, double pY) {
   double dx, dy, c;
   int i;
-  uint16_t delay_per_step = PATH_WRITE_DELAY*1000;
+  uint16_t delay_per_step_u = PATH_WRITE_DELAY_US;
 
   // dx dy of new point
   dx = pX - lastX;
@@ -242,7 +240,7 @@ void drawTo(double pX, double pY) {
   c = floor(4 * sqrt(dx * dx + dy * dy));
 
   if (c < 1) {
-      delay_per_step >>= 2;
+      delay_per_step_u >>= 3;
       c = 1;
   }
 
@@ -250,9 +248,10 @@ void drawTo(double pX, double pY) {
     // draw line point by point
     set_XY(lastX + (i * dx / c), lastY + (i * dy / c));
     if(servoLift == LIFT0)
-        delayMicroseconds(delay_per_step);
+        delayMicroseconds(delay_per_step_u);
+    else
+        delayMicroseconds(delay_per_step_u >> 2);
   }
-
   lastX = pX;
   lastY = pY;
 }

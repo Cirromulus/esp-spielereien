@@ -45,7 +45,7 @@
 Servo servo_left;
 Servo servo_right;
 
-int last_min = 0;
+int last_min = -1;
 
 void setup()
 {
@@ -56,17 +56,20 @@ void setup()
   if (RTC.read(tm))
   {
     setSyncProvider(RTC.get);
-    Serial.println("DS1307 time is set OK.");
-
+    setSyncInterval(60);
+    time_t rtc_time = RTC.get();
+    setTime(rtc_time);
+    Serial.print("DS1307 time can be read OK: ");
+    Serial.println(rtc_time);
   }
   else
   {
       if (!setTimeFromBuild()) {
           Serial.println("Time lib could not set the time");
-          setTime(19,38,0,0,0,0);
+          setTime(0,0,0,0,0,0);
       }
   }
-  Serial.println("To set time, first enter date, then time");
+  Serial.println("To set time, first enter date, then time (UTC!)");
   Serial.println("In the format:");
   Serial.println(__DATE__);
   Serial.println(__TIME__);
@@ -126,7 +129,7 @@ void loop()
 #endif
     if (!servo_left.attached()) servo_left.attach(SERVOPINLEFT);
     if (!servo_right.attached()) servo_right.attach(SERVOPINRIGHT);
-    delay(PATH_WRITE_DELAY);
+    delayMicroseconds(PATH_WRITE_DELAY_US);
 
 #ifndef GLOWINDARK
     lift(LIFT0);

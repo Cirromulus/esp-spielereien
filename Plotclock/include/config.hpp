@@ -1,5 +1,7 @@
 #pragma once
 
+#include <inttypes.h>
+
 // delete or mark the next line as comment if you don't need these
 //#define CALIBRATION      // enable calibration mode
 #define REALTIMECLOCK    // enable real time clock
@@ -27,7 +29,7 @@
 
 // speed of liftimg arm, higher is slower
 #define LIFTSPEED 1500
-#define PATH_WRITE_DELAY 4
+static constexpr uint32_t PATH_WRITE_DELAY_US=2000;
 
 // length of arms
 #define L1 35.5
