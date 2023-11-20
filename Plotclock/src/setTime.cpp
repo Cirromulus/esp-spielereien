@@ -95,10 +95,6 @@ bool readInto(char* into, const unsigned max_bufsize)
 }
 
 bool setTimeFromSerial() {
-    Serial.println("To set time, first enter date, then time (UTC!)");
-    Serial.println("In the format:");
-    Serial.println(__DATE__);
-    Serial.println(__TIME__);
     static constexpr unsigned max_bufsize = 32;
     char date[max_bufsize+1];
     char time[max_bufsize+1];

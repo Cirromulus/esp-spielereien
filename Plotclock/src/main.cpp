@@ -68,6 +68,10 @@ void setup()
           setTime(0,0,0,0,0,0);
       }
   }
+  Serial.println("To set time, first enter date, then time (UTC!)");
+  Serial.println("In the format:");
+  Serial.println(__DATE__);
+  Serial.println(__TIME__);
 #else
   // Set current time only the first to values, hh,mm are needed
   setTime(19,38,0,0,0,0);
@@ -88,6 +92,11 @@ void setup()
 
 void loop()
 {
+  #ifdef REALTIMECLOCK
+    if (Serial.available()) {
+        setTimeFromSerial();
+    }
+  #endif
 
 #ifdef CALIBRATION
     while(true) {
@@ -130,15 +139,13 @@ void loop()
     lift(LIFT0);
     drawNumber( 3, 3, 111, 1);   //wipe
 #endif
-    drawNumber(char_offset_x[0], char_offset_y, hour(t) / 10, 0.9);
-    drawNumber(char_offset_x[1], char_offset_y, hour(t) % 10, 0.9);
+    drawNumber(char_offset_x[0], char_offset_y, hour(t) / 10, FONT_SCALE);
+    drawNumber(char_offset_x[1], char_offset_y, hour(t) % 10, FONT_SCALE);
 
-    drawNumber(char_offset_x[2], char_offset_y, 11, 0.9);    // dots
+    drawNumber(char_offset_x[2], char_offset_y, 11, FONT_SCALE);    // dots
 
-    drawNumber(char_offset_x[3], char_offset_y, minute(t) / 10, 0.9);
-    drawNumber(char_offset_x[4], char_offset_y, minute(t) % 10, 0.9);
-
-    delayMicroseconds(PATH_WRITE_DELAY_US);
+    drawNumber(char_offset_x[3], char_offset_y, minute(t) / 10, FONT_SCALE);
+    drawNumber(char_offset_x[4], char_offset_y, minute(t) % 10, FONT_SCALE);
 
     lift(LIFT2);
     drawTo(rest_position[0], rest_position[1]);   // pen rest
@@ -153,12 +160,4 @@ void loop()
     servo_left.detach();
     servo_right.detach();
   }
-
-#ifdef REALTIMECLOCK
-    if (Serial) {
-        setTimeFromSerial();
-    }
-#endif
-
-
 }

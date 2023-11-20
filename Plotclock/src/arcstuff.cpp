@@ -92,7 +92,7 @@ void drawNumber(float bx, float by, int num, float scale) {
     lift(LIFT1);
     break;
 
-  case 111:
+  case 111: // wipe
 
     lift(LIFT0);
     drawTo(70, 46);
@@ -122,20 +122,20 @@ void drawNumber(float bx, float by, int num, float scale) {
 
     break;
 
-  case 11:
+  case 11: // dots
     drawTo(bx + 5 * scale, by + 15 * scale);
     lift(LIFT0);
     bogenGZS(bx + 5 * scale, by + 15 * scale, 0.1 * scale, 1, -1, 1);
-    delay((PATH_WRITE_DELAY_US << 5) / 1000);   // big value
+    delayMicroseconds(PATH_WRITE_DELAY_US << 5);   // big value
     lift(LIFT1);
     drawTo(bx + 5 * scale, by + 5 * scale);
     lift(LIFT0);
     bogenGZS(bx + 5 * scale, by + 5 * scale, 0.1 * scale, 1, -1, 1);
-    delay((PATH_WRITE_DELAY_US << 5) / 1000);
+    delayMicroseconds(PATH_WRITE_DELAY_US << 5);
     lift(LIFT1);
     break;
-
   }
+  delayMicroseconds(PATH_WRITE_DELAY_US);
 }
 
 void lift(uint16_t lift_amount) {
@@ -158,7 +158,7 @@ void lift(uint16_t lift_amount) {
     delayMicroseconds(PATH_WRITE_DELAY_US);  //ease the transition
 #else
 
-    delayMicroseconds(PATH_WRITE_DELAY_US << 2);  //ease the transition
+    delayMicroseconds(PATH_WRITE_DELAY_US * 3);  //ease the transition
     servoLift = lift_amount;
     digitalWrite(SERVOPINLIFT, lift_amount == LIFT0);
 #endif
@@ -204,7 +204,7 @@ void set_XY(double Tx, double Ty)
   dx = Tx - O1X;
   dy = Ty - O1Y;
 
-  // polar lemgth (c) and angle (a1)
+  // polar length (c) and angle (a1)
   c = sqrt(dx * dx + dy * dy); //
   a1 = atan2(dy, dx); //
   a2 = return_angle(L1, L2, c);

@@ -29,7 +29,7 @@
 
 // speed of liftimg arm, higher is slower
 #define LIFTSPEED 1500
-static constexpr uint32_t PATH_WRITE_DELAY_US=2050;
+static constexpr uint32_t PATH_WRITE_DELAY_US=2100;
 
 // length of arms
 #define L1 33.0
@@ -43,6 +43,7 @@ static constexpr uint32_t PATH_WRITE_DELAY_US=2050;
 #define O1Y (-29+EXTRA_Y_OFFS)
 #define O2X 46
 #define O2Y (-29+EXTRA_Y_OFFS)
+static constexpr float FONT_SCALE = 1;
 
 // pen_offset = {5, 19, 28, 34, 48};
 static constexpr unsigned char_offset_x [] = {5, 21, 33, 44, 57};
