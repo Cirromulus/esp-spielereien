@@ -8,8 +8,8 @@
 #define GLOWINDARK
 
 // When in calibration mode, adjust the following factor until the servos move exactly 90 degrees
-#define SERVOFAKTORLEFT 650
-#define SERVOFAKTORRIGHT 650
+#define SERVOFAKTORLEFT 655
+#define SERVOFAKTORRIGHT 655
 
 // Zero-position of left and right servo
 // When in calibration mode, adjust the NULL-values so that
@@ -29,19 +29,19 @@
 
 // speed of liftimg arm, higher is slower
 #define LIFTSPEED 1500
-static constexpr uint32_t PATH_WRITE_DELAY_US=2000;
+static constexpr uint32_t PATH_WRITE_DELAY_US=2050;
 
 // length of arms
-#define L1 35.5
-#define L2 56.5 //55.1
+#define L1 33.0
+#define L2 54.0 //55.1
 #define L3 12 //13.2
 
 // origin points of left and right servo
 // this is a lie, but negative y values are unsupported
-#define EXTRA_Y_OFFS 8
-#define O1X 21
+#define EXTRA_Y_OFFS 0
+#define O1X 24
 #define O1Y (-29+EXTRA_Y_OFFS)
-#define O2X 45
+#define O2X 46
 #define O2Y (-29+EXTRA_Y_OFFS)
 
 // pen_offset = {5, 19, 28, 34, 48};

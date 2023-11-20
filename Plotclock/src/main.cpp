@@ -33,7 +33,6 @@
   #include <DS1307RTC.h> // see http://playground.arduino.cc/Code/time
   #include "setTime.hpp"
 
-  // US Eastern Time Zone (New York, Detroit)
   TimeChangeRule myDST = {"CEST", week_t::Second, Sun, Mar, 2, +120};
   TimeChangeRule mySTD = {"CET",  week_t::First, Sun, Nov, 2, +60};
   Timezone timezone(myDST, mySTD);
@@ -138,6 +137,8 @@ void loop()
 
     drawNumber(char_offset_x[3], char_offset_y, minute(t) / 10, 0.9);
     drawNumber(char_offset_x[4], char_offset_y, minute(t) % 10, 0.9);
+
+    delayMicroseconds(PATH_WRITE_DELAY_US);
 
     lift(LIFT2);
     drawTo(rest_position[0], rest_position[1]);   // pen rest
