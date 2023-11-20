@@ -72,33 +72,52 @@ bool setTimeFromString(const char* date, const char* time) {
     return false;
 }
 
-bool setTimeFromSerial() {
-    static constexpr unsigned max_bufsize = 32;
-    char date[max_bufsize+1];
-    char time[max_bufsize+1];
-    char c;
+bool readInto(char* into, const unsigned max_bufsize)
+{
     uint8_t count = 0;
     while(count < max_bufsize) {
         while(!Serial.available()){};
-        if((c = Serial.read()) == '\n')
+        into[count] = Serial.read();
+        Serial.print(into[count]);
+        if(into[count] == '\r')
             break;
-        date[count++] = c;
-        Serial.print(c);
-    }
-    date[count] = 0;
-    Serial.print(c);
-    Serial.println("ok, now time:");
-    count = 0;
-    while(count < max_bufsize) {
-        while(!Serial.available()){};
-        if((c = Serial.read()) == '\n')
+        if(into[count] == '\n')
             break;
-        time[count++] = c;
-        Serial.print(c);
+        if(!isPrintable(into[count]))
+        {
+            Serial.println("character broken...? resetting");
+            return false;
+        }
+        count++;
     }
-    time[count] = 0;
-    Serial.println(c);
+    into[count] = 0;
+    return true;
+}
 
+bool setTimeFromSerial() {
+    Serial.println("To set time, first enter date, then time (UTC!)");
+    Serial.println("In the format:");
+    Serial.println(__DATE__);
+    Serial.println(__TIME__);
+    static constexpr unsigned max_bufsize = 32;
+    char date[max_bufsize+1];
+    char time[max_bufsize+1];
+    Serial.print("Date like '");
+    Serial.print(__DATE__);
+    Serial.println("':");
+    if (!readInto(date, max_bufsize))
+        return false;
+    Serial.print("\ngot string '");
+    Serial.print(date);
+    Serial.println("'");
+    Serial.print("\nok, now time like '");
+    Serial.print(__TIME__);
+    Serial.println("':");
+    if (!readInto(time, max_bufsize))
+        return false;
+    Serial.print("\ngot string '");
+    Serial.print(time);
+    Serial.println("'\n");
     return setTimeFromString(date,time);
 }
 

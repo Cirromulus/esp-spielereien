@@ -69,10 +69,6 @@ void setup()
           setTime(0,0,0,0,0,0);
       }
   }
-  Serial.println("To set time, first enter date, then time (UTC!)");
-  Serial.println("In the format:");
-  Serial.println(__DATE__);
-  Serial.println(__TIME__);
 #else
   // Set current time only the first to values, hh,mm are needed
   setTime(19,38,0,0,0,0);
@@ -158,7 +154,7 @@ void loop()
   }
 
 #ifdef REALTIMECLOCK
-    if (Serial.available()) {
+    if (Serial) {
         setTimeFromSerial();
     }
 #endif
