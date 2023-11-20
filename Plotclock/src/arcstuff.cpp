@@ -19,82 +19,82 @@ void drawNumber(float bx, float by, int num, float scale) {
 
   case 0:
     drawTo(bx + 12 * scale, by + 6 * scale);
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     bogenGZS(bx + 7 * scale, by + 10 * scale, 10 * scale, -0.8, 6.7, 0.5);
-    lift(LIFT1);
+    lift(LIFT_HIGH);
     break;
   case 1:
 
     drawTo(bx + 3 * scale, by + 15 * scale);
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     drawTo(bx + 10 * scale, by + 20 * scale);
     drawTo(bx + 10 * scale, by + 0 * scale);
-    lift(LIFT1);
+    lift(LIFT_HIGH);
     break;
   case 2:
     drawTo(bx + 2 * scale, by + 12 * scale);
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     bogenUZS(bx + 8 * scale, by + 14 * scale, 6 * scale, 3, -0.8, 1);
     drawTo(bx + 1 * scale, by + 0 * scale);
     drawTo(bx + 12 * scale, by + 0 * scale);
-    lift(LIFT1);
+    lift(LIFT_HIGH);
     break;
   case 3:
     drawTo(bx + 2 * scale, by + 17 * scale);
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     bogenUZS(bx + 5 * scale, by + 15 * scale, 5 * scale, 3, -2, 1);
     bogenUZS(bx + 5 * scale, by + 5 * scale, 5 * scale, 1.57, -3, 1);
-    lift(LIFT1);
+    lift(LIFT_HIGH);
     break;
   case 4:
     drawTo(bx + 10 * scale, by + 0 * scale);
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     drawTo(bx + 10 * scale, by + 20 * scale);
     drawTo(bx + 2 * scale, by + 6 * scale);
     drawTo(bx + 12 * scale, by + 6 * scale);
-    lift(LIFT1);
+    lift(LIFT_HIGH);
     break;
   case 5:
     drawTo(bx + 2 * scale, by + 5 * scale);
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     bogenGZS(bx + 5 * scale, by + 6 * scale, 6 * scale, -2.5, 2, 1);
     drawTo(bx + 5 * scale, by + 20 * scale);
     drawTo(bx + 12 * scale, by + 20 * scale);
-    lift(LIFT1);
+    lift(LIFT_HIGH);
     break;
   case 6:
     drawTo(bx + 2 * scale, by + 10 * scale);
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     bogenUZS(bx + 7 * scale, by + 6 * scale, 6 * scale, 2, -4.4, 1);
     drawTo(bx + 11 * scale, by + 20 * scale);
-    lift(LIFT1);
+    lift(LIFT_HIGH);
     break;
   case 7:
     drawTo(bx + 2 * scale, by + 20 * scale);
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     drawTo(bx + 12 * scale, by + 20 * scale);
     drawTo(bx + 2 * scale, by + 0);
-    lift(LIFT1);
+    lift(LIFT_HIGH);
     break;
   case 8:
     drawTo(bx + 5 * scale, by + 10 * scale);
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     bogenUZS(bx + 5 * scale, by + 15 * scale, 5 * scale, 4.7, -1.6, 1);
     bogenGZS(bx + 5 * scale, by + 5 * scale, 5 * scale, -4.7, 2, 1);
-    lift(LIFT1);
+    lift(LIFT_HIGH);
     break;
 
   case 9:
     drawTo(bx + 9 * scale, by + 11 * scale);
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     bogenUZS(bx + 7 * scale, by + 15 * scale, 5 * scale, 4, -0.5, 1);
     drawTo(bx + 5 * scale, by + 0);
-    lift(LIFT1);
+    lift(LIFT_HIGH);
     break;
 
   case 111: // wipe
 
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     drawTo(70, 46);
     drawTo(65, 43);
 
@@ -118,21 +118,21 @@ void drawNumber(float bx, float by, int num, float scale) {
     drawTo(60, 44);
 
     drawTo(75.2, 47);
-    lift(LIFT2);
+    lift(LIFT_SWEP);
 
     break;
 
   case 11: // dots
     drawTo(bx + 5 * scale, by + 15 * scale);
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     bogenGZS(bx + 5 * scale, by + 15 * scale, 0.1 * scale, 1, -1, 1);
-    delayMicroseconds(PATH_WRITE_DELAY_US << 5);   // big value
-    lift(LIFT1);
+    delay((PATH_WRITE_DELAY_US / 1000.) * 32);   // big value
+    lift(LIFT_HIGH);
     drawTo(bx + 5 * scale, by + 5 * scale);
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     bogenGZS(bx + 5 * scale, by + 5 * scale, 0.1 * scale, 1, -1, 1);
-    delayMicroseconds(PATH_WRITE_DELAY_US << 5);
-    lift(LIFT1);
+    delay((PATH_WRITE_DELAY_US / 1000.) * 64);
+    lift(LIFT_HIGH);
     break;
   }
   delayMicroseconds(PATH_WRITE_DELAY_US);
@@ -158,9 +158,9 @@ void lift(uint16_t lift_amount) {
     delayMicroseconds(PATH_WRITE_DELAY_US);  //ease the transition
 #else
 
-    delayMicroseconds(PATH_WRITE_DELAY_US * 3);  //ease the transition
+    delay((PATH_WRITE_DELAY_US / 1000.) * 8);  //ease the transition
     servoLift = lift_amount;
-    digitalWrite(SERVOPINLIFT, lift_amount == LIFT0);
+    digitalWrite(SERVOPINLIFT, lift_amount == LIFT_DRAW);
 #endif
 }
 
@@ -247,7 +247,7 @@ void drawTo(double pX, double pY) {
   for (i = 0; i <= c; i++) {
     // draw line point by point
     set_XY(lastX + (i * dx / c), lastY + (i * dy / c));
-    if(servoLift == LIFT0)
+    if(servoLift == LIFT_DRAW)
         delayMicroseconds(delay_per_step_u);
     else
         delayMicroseconds(delay_per_step_u >> 2);

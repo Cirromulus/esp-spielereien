@@ -81,10 +81,10 @@ void setup()
   drawTo(rest_position[0], rest_position[1]);
 #ifndef GLOWINDARK
   servo_lift.attach(SERVOPINLIFT);  //  lifting servo
-  lift(LIFT0);
+  lift(LIFT_DRAW);
 #else
   pinMode(SERVOPINLIFT, OUTPUT);
-  lift(LIFT1);
+  lift(LIFT_HIGH);
 #endif
   servo_left.attach(SERVOPINLEFT);  //  left servo
   servo_right.attach(SERVOPINRIGHT);  //  right servo
@@ -100,25 +100,22 @@ void loop()
 
 #ifdef CALIBRATION
     while(true) {
-        /*
-          // Servohorns will have 90° between movements, parallel to x and y axis
-          lift(LIFT2);
-          drawTo(-3, 29.2);
-          delay(500);
-          drawTo(74.1, 28);
-          delay(750);
-          lift(LIFT0);
-          delay(1000);
-      */
+      // Servohorns will have 90° between movements, parallel to x and y axis
+      lift(LIFT_SWEP);
+      drawTo(-3, 29.2);
+      delay(500);
+      lift(LIFT_DRAW);
+      drawTo(74.1, 28);
+      delay(1000);
       //square
-      drawTo(5, 15);
-      delay(2000);
-      drawTo(5, 50);
-      delay(500);
-      drawTo(70, 50);
-      delay(500);
-      drawTo(70,15);
-      delay(500);
+      // drawTo(5, 15);
+      // delay(2000);
+      // drawTo(5, 50);
+      // delay(500);
+      // drawTo(70, 50);
+      // delay(500);
+      // drawTo(70,15);
+      // delay(500);
   }
 #endif
 
@@ -136,7 +133,7 @@ void loop()
     delayMicroseconds(PATH_WRITE_DELAY_US);
 
 #ifndef GLOWINDARK
-    lift(LIFT0);
+    lift(LIFT_DRAW);
     drawNumber( 3, 3, 111, 1);   //wipe
 #endif
     drawNumber(char_offset_x[0], char_offset_y, hour(t) / 10, FONT_SCALE);
@@ -147,9 +144,9 @@ void loop()
     drawNumber(char_offset_x[3], char_offset_y, minute(t) / 10, FONT_SCALE);
     drawNumber(char_offset_x[4], char_offset_y, minute(t) % 10, FONT_SCALE);
 
-    lift(LIFT2);
+    lift(LIFT_SWEP);
     drawTo(rest_position[0], rest_position[1]);   // pen rest
-    lift(LIFT1);
+    lift(LIFT_HIGH);
 
     last_min = minute();
 
