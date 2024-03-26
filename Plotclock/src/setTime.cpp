@@ -42,7 +42,7 @@ bool setTimeFromString(const char* date, const char* time) {
     bool parse=false;
     bool config=false;
 
-    // get the date and time the compiler was run
+    // check validity of given strings
     if (getDate(date) && getTime(time)) {
         parse = true;
         // and configure the RTC with this info

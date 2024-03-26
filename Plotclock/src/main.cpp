@@ -29,13 +29,13 @@
 // DS1307RTC works with the DS1307, DS1337 and DS3231 real time clock chips.
 // Please run the SetTime example to initialize the time on new RTC chips and begin running.
 
-  #include <Wire.h>
-  #include <DS1307RTC.h> // see http://playground.arduino.cc/Code/time
-  #include "setTime.hpp"
+#include <Wire.h>
+#include <DS1307RTC.h> // see http://playground.arduino.cc/Code/time
+#include "setTime.hpp"
 
-  TimeChangeRule myDST = {"CEST", week_t::Second, Sun, Mar, 2, +120};
-  TimeChangeRule mySTD = {"CET",  week_t::First, Sun, Nov, 2, +60};
-  Timezone timezone(myDST, mySTD);
+TimeChangeRule mySTD = {"CEST", week_t::Second, Sun, Nov, 2, +120};
+TimeChangeRule myDST = {"CET",  week_t::First, Sun, Mar, 2, +60};
+Timezone timezone(myDST, mySTD);
 #endif
 
 #ifndef GLOWINDARK
@@ -72,13 +72,21 @@ void setup()
   Serial.println("In the format:");
   Serial.println(__DATE__);
   Serial.println(__TIME__);
+  if (timezone.locIsDST(RTC.get()))
+  {
+    Serial.println("By the way, the RTC suggests that we are currently in DST");
+  }
 #else
   // Set current time only the first to values, hh,mm are needed
   setTime(19,38,0,0,0,0);
 #endif
 
-
+  servo_left.attach(SERVOPINLEFT);
+  servo_right.attach(SERVOPINRIGHT);
   drawTo(rest_position[0], rest_position[1]);
+  servo_left.detach();
+  servo_right.detach();
+
 #ifndef GLOWINDARK
   servo_lift.attach(SERVOPINLIFT);  //  lifting servo
   lift(LIFT_DRAW);
@@ -86,8 +94,11 @@ void setup()
   pinMode(SERVOPINLIFT, OUTPUT);
   lift(LIFT_HIGH);
 #endif
-  servo_left.attach(SERVOPINLEFT);  //  left servo
-  servo_right.attach(SERVOPINRIGHT);  //  right servo
+
+#ifdef SWITCHPIN
+  pinMode(SWITCHPIN, INPUT_PULLUP);
+#endif
+
 }
 
 void loop()
@@ -119,10 +130,28 @@ void loop()
   }
 #endif
 
-    time_t t = now();
-    #ifdef REALTIMECLOCK
-        t = timezone.toLocal(t);
-    #endif
+  #ifdef SWITCHPIN
+    if (!digitalRead(SWITCHPIN))
+    {
+      // switch is "on", so don't write to screen
+      return;
+    }
+  #endif
+
+  time_t t = now();
+  #ifdef REALTIMECLOCK
+      // Serial.print("utcIsDST: ");
+      // Serial.println(timezone.utcIsDST(t));
+      // Serial.print("localIsDST: ");
+      // Serial.println(timezone.locIsDST(t));
+
+      // TimeChangeRule *tcr_used;
+      t = timezone.toLocal(t);//, &tcr_used);
+      // Serial.print(tcr_used->abbrev);
+      // Serial.print(": ");
+      // Serial.println(tcr_used->offset);
+
+  #endif
 
   if (last_min != minute()) {
 #ifndef GLOWINDARK
