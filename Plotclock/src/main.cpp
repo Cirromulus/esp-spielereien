@@ -33,8 +33,8 @@
 #include <DS1307RTC.h> // see http://playground.arduino.cc/Code/time
 #include "setTime.hpp"
 
-TimeChangeRule mySTD = {"CEST", week_t::Second, Sun, Nov, 2, +120};
-TimeChangeRule myDST = {"CET",  week_t::First, Sun, Mar, 2, +60};
+TimeChangeRule mySTD = {"CEST", week_t::Last, Sun, Mar, 2, +120};
+TimeChangeRule myDST = {"CET",  week_t::Last, Sun, Oct, 2, +60};
 Timezone timezone(myDST, mySTD);
 #endif
 
