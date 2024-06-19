@@ -74,9 +74,20 @@ bool setTimeFromString(const char* date, const char* time) {
 
 bool readInto(char* into, const unsigned max_bufsize)
 {
+    static constexpr uint32_t readline_timeout_seconds = 10;
+    // static_assert(std::numeric_limits<decltype(millis())>::max() >= readline_timeout_seconds * 1000);
+
     uint8_t count = 0;
     while(count < max_bufsize) {
-        while(!Serial.available()){};
+        const auto startWait = millis();
+        while(!Serial.available())
+        {
+            if (millis() - startWait > readline_timeout_seconds * 1000)
+            {
+                Serial.println("Timeout... resetting");
+                return false;
+            }
+        };
         into[count] = Serial.read();
         Serial.print(into[count]);
         if(into[count] == '\r')
