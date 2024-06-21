@@ -63,9 +63,15 @@ void setup()
   }
   else
   {
+      Serial.println("Forgot Time! Setting it to the time of build");
       if (!setTimeFromBuild()) {
           Serial.println("Time lib could not set the time");
           setTime(0,0,0,0,0,0);
+      }
+      // Indicate that by drawing all dots on screen
+      for (unsigned i = 0; i < 4; i++)
+      {
+        drawNumber(char_offset_x[i], char_offset_y, 11, FONT_SCALE);    // dots
       }
   }
   Serial.println("To set time, first enter date, then time (UTC!)");

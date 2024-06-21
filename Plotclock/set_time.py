@@ -7,6 +7,23 @@ import sys
 
 code = 'latin-1'
 
+def send(serial, message, withNewline = False):
+    print (f'Device --> Host: {message}')
+    serial.write(message.encode(code))
+    if withNewline:
+        serial.write(b'\n')
+
+def receive(serial):
+    line = serial.readline()
+    if line:
+        decoded_line = line.decode(code).strip()
+        if not decoded_line:
+            decoded_line = "--whitespace--"
+        print (f'Host <-- Device: {decoded_line}')
+        return decoded_line
+
+
+
 serial_device = '/dev/ttyUSB0'
 if len(sys.argv) == 2:
     serial_device = sys.argv[1]
@@ -19,20 +36,23 @@ ser = serial.Serial(serial_device, baudrate=115200, timeout=1, dsrdtr=True)
 assert(ser.is_open)
 
 print ("connected. Waiting for greeting text...")
-remaining_tries = 10
 
-line = ser.readline()
+tries = 10
+remaining_tries = tries
+
+line = receive(ser)
 while line or remaining_tries != 0:
     if line:
-        decoded_line = line.decode(code).strip()
-        print (f'Host <-- Device: {decoded_line}')
-        if "Date like " in decoded_line:
+        remaining_tries = tries
+        if "Date like " in line:
             print ("Got expected greeting text!")
             break
     else:
         print (f"Waiting ({remaining_tries})...")
+        idle_indicator = '*'
+        send(ser, idle_indicator)
         remaining_tries -= 1
-    line = ser.readline()
+    line = receive(ser)
 
 if remaining_tries == 0:
     print ("Timeout. Sending anyway!")
@@ -42,23 +62,16 @@ now = datetime.datetime.now(datetime.UTC)
 day = now.strftime("%b %d %Y")
 wct = now.strftime("%H:%M:%S")
 
-print (f'Device --> Host: {day}')
-ser.write(day.encode(code))
-ser.write(b'\n')
-print (f'Device --> Host: {wct}')
-ser.write(wct.encode(code))
-ser.write(b'\n')
-
+send(ser, day, withNewline=True)
+send(ser, wct, withNewline=True)
 print ("Done sending. Answer:")
 
 success = False
-line = ser.readline()
+line = receive(ser)
 while line:
-    decoded_line = line.decode(code).strip()
-    print (f'Host <-- Device: {decoded_line}')
-    if "DS1307 configured!" in decoded_line:
+    if "DS1307 configured!" in line:
         success = True
-    line = ser.readline()
+    line = receive(ser)
 
 if success:
     print ("Got successful message, so assuming correctly set time.")

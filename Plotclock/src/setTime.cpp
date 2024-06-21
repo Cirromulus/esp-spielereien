@@ -89,7 +89,12 @@ bool readInto(char* into, const unsigned max_bufsize)
             }
         };
         into[count] = Serial.read();
+
+        if(into[count] == '*')  // Special character to indicate remote's readyness!
+            continue;           // this char will be ignored in buffer.
+
         Serial.print(into[count]);
+
         if(into[count] == '\r')
             break;
         if(into[count] == '\n')

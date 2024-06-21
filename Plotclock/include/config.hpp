@@ -32,7 +32,7 @@
 static constexpr uint32_t PATH_WRITE_DELAY_US=2100;
 
 // length of arms
-#define L1 34.0
+#define L1 34.2
 #define L2 55.1
 #define L3 13.2
 
